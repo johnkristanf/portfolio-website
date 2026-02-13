@@ -74,7 +74,8 @@ export class ChatService {
   static async sendMessage(
     userMessage: string,
     systemPrompt?: string,
-    options?: ChatOptions
+    options?: ChatOptions,
+    toolsCallMap?: Map<string, (args: any) => Promise<any> | any>,
   ): Promise<ChatResponse> {
     const input: ChatMessage[] = []
 
@@ -84,7 +85,12 @@ export class ChatService {
 
     input.push({ role: 'user', content: userMessage })
 
-    return this.callLLM(input, options)
+    // Run normal call if no tools, otherwise use callLLMWithFunctions
+    if (!options?.tools || options.tools.length === 0) {
+      return this.callLLM(input, options)
+    } else {
+      return this.callLLMWithFunctions(input, toolsCallMap!, options)
+    }
   }
 
   /**
@@ -92,8 +98,7 @@ export class ChatService {
    */
   static async callLLMWithFunctions(
     input: ChatMessage[],
-    tools: Tool[],
-    functionImplementations: Map<string, (args: any) => Promise<any> | any>,
+    toolsCallMap: Map<string, (args: any) => Promise<any> | any>,
     options: ChatOptions = {},
     maxIterations: number = 5
   ): Promise<ChatResponse> {
@@ -104,7 +109,6 @@ export class ChatService {
     while (iterations < maxIterations) {
       const response = await this.callLLM(currentInput, {
         ...options,
-        tools,
         previousResponseId,
       })
 
@@ -116,7 +120,7 @@ export class ChatService {
 
       // Execute function calls and add results to input
       for (const functionCall of response.functionCalls) {
-        const func = functionImplementations.get(functionCall.name)
+        const func = toolsCallMap.get(functionCall.name)
         if (!func) {
           throw new Error(`Function ${functionCall.name} not found`)
         }
@@ -142,7 +146,7 @@ export class ChatService {
       iterations++
     }
 
-    return await this.callLLM(currentInput, { ...options, tools, previousResponseId })
+    return await this.callLLM(currentInput, { ...options, previousResponseId })
   }
 }
 

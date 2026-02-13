@@ -14,6 +14,7 @@ export interface ChatMessage {
     }
   }
   
+  
   export interface ChatOptions {
     model?: string
     temperature?: number
