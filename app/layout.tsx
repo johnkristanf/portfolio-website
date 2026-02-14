@@ -13,6 +13,8 @@ const geistMono = Geist_Mono({
     subsets: ['latin'],
 })
 
+import { PostHogProvider } from './providers'
+
 export const metadata: Metadata = {
     title: 'John Kristan.Dev',
     description: 'John Kristan Web Development Portfolio',
@@ -29,14 +31,15 @@ export default function RootLayout({
     return (
         <html lang="en">
             <title>John Kristan.Dev</title>
+            <PostHogProvider>
+                <body
+                    className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white overflow-x-hidden`}
+                >
+                    {children}
 
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white overflow-x-hidden`}
-            >
-                {children}
-
-                <Toaster position="top-right" />
-            </body>
+                    <Toaster position="top-right" />
+                </body>
+            </PostHogProvider>
         </html>
     )
 }
