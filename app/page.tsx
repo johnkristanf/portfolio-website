@@ -96,7 +96,7 @@ export default function Home() {
                         </h2>
                     </div>
                     <p className="text-lg md:text-xl mb-8 text-gray-300 typing-animation max-w-2xl mx-auto">
-                        Passionate software engineer crafting innovative web solutions with 1+
+                        Passionate software engineer crafting innovative products with 1+
                         year of web development experience and a portfolio of personal projects
                     </p>
 
@@ -310,7 +310,7 @@ export default function Home() {
 
             <footer className="py-8 bg-gray-900 text-center">
                 <p className="text-gray-400">
-                    &copy; 2025 John Kristan F. Torremocha. Crafted with 💜 and lots of ☕
+                    &copy; {new Date().getFullYear()} John Kristan F. Torremocha. Crafted with 💜 and lots of ☕
                 </p>
             </footer>
             <ChatWidget />

@@ -57,6 +57,20 @@ export default function SocialMedia() {
                     alt="Twitter Icon"
                 />
             </a>
+
+            <a
+                href="https://medium.com/@torremocha.johnkristan_96876"
+                target="__blank"
+                className="w-10 h-10 rounded-full flex items-center "
+            >
+                <Image
+                    src={'/img/medium.png'}
+                    className=" rounded-full"
+                    width={30}
+                    height={30}
+                    alt="Twitter Icon"
+                />
+            </a>
         </div>
     )
 }
