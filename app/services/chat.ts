@@ -26,11 +26,7 @@ export class ChatService {
             params.previous_response_id = previousResponseId
         }
 
-        console.log('params: ', JSON.stringify(params, null, 2))
-
         const response = await openai.responses.create(params)
-
-        console.log('response: ', JSON.stringify(response, null, 2))
 
         const functionCalls: FunctionCall[] = []
         let content: string | null = null
@@ -90,46 +86,31 @@ export class ChatService {
         input: ChatMessage[],
         toolsCallMap: Map<string, (args: any) => Promise<any> | any>,
         options: ChatOptions,
-        maxIterations: number = 5,
     ): Promise<ChatResponse> {
         let currentInput = [...input]
         let previousResponseId = options.previousResponseId
-        let iterations = 0
 
-        if (iterations >= maxIterations) {
-            return {
-                content:
-                    "I've reached the maximum number of attempts to process this request. Please try again later.",
-            }
+        const response = await this.callLLM(currentInput, {
+            ...options,
+            previousResponseId,
+        })
+
+        if (!response.functionCalls || response.functionCalls.length === 0) {
+            return response
         }
 
-        while (iterations < maxIterations) {
-            const response = await this.callLLM(currentInput, {
-                ...options,
-                previousResponseId,
+        previousResponseId = response.responseId
+
+        // Execute function calls and add results to input
+        for (const functionCall of response.functionCalls) {
+            const functionResult = await this.executeFunctionCall(functionCall, toolsCallMap)
+
+            // Add function result to input
+            currentInput.push({
+                type: 'function_call_output',
+                output: JSON.stringify(functionResult),
+                call_id: functionCall.id,
             })
-
-            if (!response.functionCalls || response.functionCalls.length === 0) {
-                return response
-            }
-
-            console.log('response.functionCalls: ', JSON.stringify(response.functionCalls, null, 2))
-
-            previousResponseId = response.responseId
-
-            // Execute function calls and add results to input
-            for (const functionCall of response.functionCalls) {
-                const functionResult = await this.executeFunctionCall(functionCall, toolsCallMap)
-
-                // Add function result to input
-                currentInput.push({
-                    type: 'function_call_output',
-                    output: JSON.stringify(functionResult),
-                    call_id: functionCall.id,
-                })
-            }
-
-            iterations++
         }
 
         return await this.callLLM(currentInput, { ...options, previousResponseId })
