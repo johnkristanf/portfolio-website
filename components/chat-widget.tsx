@@ -21,6 +21,7 @@ export default function ChatWidget() {
     const [messages, setMessages] = useState<Message[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const chatContainerRef = useRef<HTMLDivElement>(null)
 
     const {
         register,
@@ -36,6 +37,20 @@ export default function ChatWidget() {
     useEffect(() => {
         scrollToBottom()
     }, [messages, isOpen])
+
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isOpen && chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node)) {
+                setIsOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [isOpen])
 
     const onSubmit = async (data: ChatFormData) => {
         const userMessage = data.message.trim()
@@ -85,10 +100,10 @@ export default function ChatWidget() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110",
+                    "fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110",
                     isOpen
-                        ? "bg-gray-700 text-white rotate-90"
-                        : "bg-gradient-to-r from-violet-600 to-purple-600 text-white animate-bounce-subtle"
+                        ? "bg-gray-700 text-white rotate-90 hidden sm:flex"
+                        : "bg-gradient-to-r from-violet-600 to-purple-600 text-white animate-bounce-subtle flex"
                 )}
                 style={{ animationDuration: '3s' }}
                 aria-label="Toggle chat"
@@ -98,7 +113,10 @@ export default function ChatWidget() {
 
             {/* Chat Modal */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-80 md:w-96 h-[500px] bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
+                <div
+                    ref={chatContainerRef}
+                    className="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 z-50 w-full sm:w-[500px] h-[100dvh] sm:h-[600px] bg-gray-900 border-0 sm:border border-gray-700 rounded-none sm:rounded-2xl shadow-none sm:shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300"
+                >
                     {/* Header */}
                     <div className="bg-gradient-to-r from-violet-900 to-purple-900 p-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -110,10 +128,16 @@ export default function ChatWidget() {
                                 <p className="text-xs text-gray-300">Ask me anything about John's Github profiles, repositories, and projects, etc...</p>
                             </div>
                         </div>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="text-white/80 hover:text-white p-1 sm:hidden transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
                     </div>
 
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900/95">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900/95 scrollbar-thin">
                         {messages.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full space-y-6 py-8">
                                 <div className="text-center space-y-2">
@@ -122,9 +146,9 @@ export default function ChatWidget() {
                                 </div>
                                 <div className="grid gap-2 w-full px-4">
                                     {[
-                                        "What are johnkristanf's most popular repositories?",
-                                        "What technologies does johnkristanf use?",
-                                        "Tell me about johnkristanf's recent projects.",
+                                        "What are John's most popular repositories?",
+                                        "What technologies does John use?",
+                                        "Tell me about John's recent projects.",
                                     ].map((question) => (
                                         <button
                                             key={question}
@@ -202,12 +226,17 @@ export default function ChatWidget() {
                         onSubmit={handleSubmit(onSubmit)}
                         className="p-4 bg-gray-900 border-t border-gray-800 flex gap-2"
                     >
-                        <input
+                        <textarea
                             {...register('message', { required: true })}
-                            type="text"
                             placeholder="Type a message..."
-                            className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 border border-gray-700 placeholder-gray-500"
-                            autoComplete="off"
+                            rows={1}
+                            className="flex-1 bg-gray-800 text-white rounded-2xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 border border-gray-700 placeholder-gray-500 resize-none min-h-[40px] max-h-32 py-2.5 scrollbar-thin"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    handleSubmit(onSubmit)()
+                                }
+                            }}
                         />
                         <button
                             type="submit"
