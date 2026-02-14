@@ -7,6 +7,7 @@ import ContactSection from '@/components/contact'
 import { handleNavClick } from '@/lib/utils'
 import SocialMedia from '@/components/social-media'
 import Projects from '@/components/projects'
+import ChatWidget from '@/components/chat-widget'
 
 export default function Home() {
     const [isClient, setIsClient] = useState(false)
@@ -312,6 +313,7 @@ export default function Home() {
                     &copy; 2025 John Kristan F. Torremocha. Crafted with 💜 and lots of ☕
                 </p>
             </footer>
+            <ChatWidget />
         </>
     )
 }

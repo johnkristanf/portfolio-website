@@ -1,40 +1,42 @@
 export interface ChatMessage {
-    role: 'system' | 'user' | 'assistant' | 'tool'
-    content: string
-  }
-  
-  export interface Tool {
+    role?: 'system' | 'user' | 'assistant' | 'tool'
+    content?: string
+    call_id?: string
+    type?: string
+    output?: string
+}
+
+export interface Tool {
     type: 'function'
     name: string
     description?: string
     parameters: {
-      type: 'object'
-      properties: Record<string, any>
-      required?: string[]
+        type: 'object'
+        properties: Record<string, any>
+        required?: string[]
     }
-  }
-  
-  
-  export interface ChatOptions {
+}
+
+export interface ChatOptions {
     model?: string
     temperature?: number
-    maxTokens?: number
     tools?: Tool[]
     previousResponseId?: string
-  }
-  
-  export interface FunctionCall {
+}
+
+export interface FunctionCall {
+    id?: string
     name: string
     arguments: string
-  }
-  
-  export interface ChatResponse {
+}
+
+export interface ChatResponse {
     content: string | null
     functionCalls?: FunctionCall[]
     responseId?: string
     usage?: {
-      promptTokens: number
-      completionTokens: number
-      totalTokens: number
+        input_tokens: number
+        output_tokens: number
+        total_tokens: number
     }
-  }
+}
