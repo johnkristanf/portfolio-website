@@ -17,7 +17,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    
     const promptPath = path.resolve(process.cwd(), 'app/prompts/github.md');
     const systemPrompt = fs.readFileSync(promptPath, 'utf-8');
 
