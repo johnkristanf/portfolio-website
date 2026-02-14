@@ -80,12 +80,7 @@ export class ChatService {
 
         input.push({ role: 'user', content: userMessage })
 
-        // Run normal call if no tools, otherwise use callLLMWithFunctions
-        if (!options?.tools || options.tools.length === 0) {
-            return this.callLLM(input, options)
-        } else {
-            return this.callLLMWithFunctions(input, toolsCallMap!, options)
-        }
+        return this.callLLMWithFunctions(input, toolsCallMap!, options!)
     }
 
     /**
@@ -100,6 +95,13 @@ export class ChatService {
         let currentInput = [...input]
         let previousResponseId = options.previousResponseId
         let iterations = 0
+
+        if (iterations >= maxIterations) {
+            return {
+                content:
+                    "I've reached the maximum number of attempts to process this request. Please try again later.",
+            }
+        }
 
         while (iterations < maxIterations) {
             const response = await this.callLLM(currentInput, {

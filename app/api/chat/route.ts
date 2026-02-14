@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         ])
 
         const options: ChatOptions = {
-            model: 'gpt-4o-mini',
+            model: process.env.AI_MODEL,
             temperature: 0.7,
             tools: tools,
         }
